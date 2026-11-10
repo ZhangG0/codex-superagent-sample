@@ -172,3 +172,6 @@ Run the ledger with `node dispatch.ts ...`; the former Python entry has been rem
 ## License
 
 [MIT](LICENSE). An independent community project, not affiliated with OpenAI.
+
+
+Task contracts, pause/resume, revision-based rework, correlated reports, recovery and versioned cursor updates are documented in the [operations guide](docs/usage.md). Message queuing follows the Codex host; no background wakeup is implied.

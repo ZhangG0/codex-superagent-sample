@@ -34,15 +34,30 @@ class Ledger:
         args=['create','--key',key,'--project',project,'--title',title,'--scope',scope,'--authorization',authorization]
         for resource in resources: args+=['--resource',resource]
         return self.call(*args)
-    def prepare(self,task): return self.call('prepare',task)
+    def prepare(self,task):
+        if not self.call('context',task):
+            t=self.get(task)
+            self.file_call('contract',task,dict(request_id=json.loads(t['request_key'])[1],description=t['payload']['title'],acceptance='synthetic checks',boundaries='synthetic workspace',next_action='review'))
+        return self.call('prepare',task)
+    def file_call(self,command,task,value):
+        with tempfile.TemporaryDirectory() as folder:
+            p=Path(folder)/'value.json';p.write_text(json.dumps(value))
+            return self.call(command,task,'--file',str(p))
     def receipt(self,task,attempt,receipt): return self.call('sent',task,'--attempt',attempt,'--receipt',receipt)
     def uncertain(self,task,evidence): return self.call('uncertain',task,'--evidence',evidence)
     def reconcile_unsent(self,task,evidence): return self.call('reconcile-unsent',task,'--evidence',evidence)
     def progress(self,task,stage,evidence): return self.call('progress',task,'--stage',stage,'--evidence',evidence)
-    def finish(self,task,evidence): return self.call('finish',task,'--evidence',evidence)
+    def finish(self,task,evidence):
+        t=self.get(task)
+        if t['status']=='running':
+            c=self.call('context',task)
+            self.file_call('report',task,dict(attempt=t['attempt'],revision=c['revision'] if c else 1,host=t['payload']['route']['host_id'],thread=t['payload']['route']['thread_id'],evidence=evidence))
+        return self.call('finish',task,'--evidence',evidence)
     def cancel(self,task,evidence): return self.call('cancel',task,'--evidence',evidence)
     def merge_cursors(self,polls):
         with tempfile.TemporaryDirectory() as folder:
+            versions={(r['host'],r['thread']):r['version'] for r in self.visible_cursors()}
+            polls=[dict(p,expected_version=versions.get((p['thread']['hostId'],p['thread']['id']),0)) for p in polls]
             p=Path(folder)/'polls.json';p.write_text(json.dumps({'polls':polls}))
             return self.call('merge-polls',str(p))
     def visible_cursors(self): return self.summary()['cursors']
