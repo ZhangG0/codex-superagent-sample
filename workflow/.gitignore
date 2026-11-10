@@ -1,0 +1,14 @@
+.local/
+config.local.json
+node_modules/
+*.sqlite3*
+__pycache__/
+*.py[cod]
+.DS_Store
+.env
+.env.*
+*.log
+*.pem
+*.key
+
+frontend/dist/

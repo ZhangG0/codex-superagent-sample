@@ -1,0 +1,19 @@
+{
+  "port": 4317,
+  "enabled": false,
+  "concurrency": 2,
+  "timeoutMs": 1800000,
+  "command": [],
+  "coordinator": null,
+  "workers": [],
+  "notifications": {
+    "command": []
+  },
+  "intake": {
+    "enabled": false
+  },
+  "usage": {
+    "enabled": false,
+    "intervalMs": 30000
+  }
+}

@@ -6,7 +6,7 @@
 
 [Who is it for?](#who-is-it-for) · [Installation](#installation) · [Configuration](#configuration) · [Usage](#usage) · [CLI guide (中文)](docs/usage.md) · [MIT License](LICENSE)
 
-This sample explores how a coordinator agent can turn a request into delegated work and evidence-based acceptance across existing Codex chats. It combines a skill, a TypeScript CLI, and a local SQLite ledger.
+This sample explores how a coordinator agent can turn a request into delegated work and evidence-based acceptance across existing Codex chats. It combines a skill, TypeScript services, a React dashboard, and local SQLite ledgers.
 
 For people maintaining several projects in Codex: one coordinator chat assigns work and verifies results, while existing project chats keep their context and handle implementation. A local SQLite ledger records tasks, dispatch attempts, shared resource claims, and verification evidence.
 
@@ -15,6 +15,37 @@ You → Coordinator chat → Native Codex chat tools → Existing project chats
               ↓                                          ↓
        TypeScript / SQLite ← Receipts, progress, and verification evidence
 ```
+
+## Entry points and repository layout
+
+This repository includes the coordinator skill, the legacy dispatch ledger, and the local Workflow service with its React dashboard.
+
+| Entry | Use it for | Setup |
+| --- | --- | --- |
+| **Codex coordinator chat** | Submit requests and coordinate existing project chats with their context intact | Install [SKILL.md](SKILL.md) and configure the [Workflow service](workflow/README.md) |
+| **Local dashboard** | Inspect teams, task progress, evidence, archives, scheduling and workflow switches | Run the service in `workflow/`; open `http://127.0.0.1:4317/` |
+| **Feishu group bot** | Send a request by mentioning the bot and receive acknowledgement and results in the same group | Install the separate [feishu-codex-bridge](https://github.com/ZhangG0/feishu-codex-bridge) project |
+| **Legacy CLI** | Maintain existing dispatcher ledgers and integrations | Use root `dispatch.ts`; see [CLI usage](docs/usage.md) |
+
+The dashboard is an inspection and control surface. Requests arrive through Codex or Feishu. Workflow and the legacy dispatcher have separate ledgers; choose one route for each task to avoid duplicate dispatch.
+
+### Start the Workflow service
+
+Node.js 24.12+ is required. From this repository:
+
+```sh
+cd workflow
+npm ci
+cp config.example.json config.local.json
+# Set your own coordinator, workers, verification chat and project permissions.
+npm start
+```
+
+Start in manual mode and confirm real chat identities before enabling automatic dispatch. The dashboard is local to your machine. SQLite and its authentication token use the platform user data directory by default; configuration, credentials and generated state stay outside Git.
+
+For the Codex desktop queue adapter, clone [feishu-codex-bridge](https://github.com/ZhangG0/feishu-codex-bridge) beside this repository, or set `FEISHU_CODEX_BRIDGE_DIR` to its root. Configure its Python environment and `codex queue` transport before enabling execution. See the [Workflow guide](workflow/README.md) for adapter, token and team settings.
+
+When a team's workflow is disabled, Bridge can route new Feishu messages directly to its bound Codex chat while the Workflow service is stopped. The main coordinator can still coordinate other chats. Keep Codex and Bridge running; restart Workflow to use its dashboard or change its settings.
 
 ## Why use it?
 
@@ -63,7 +94,9 @@ read_thread, send_message_to_thread, and wait_threads. Report which capabilities
 are available.
 
 Clone the source into a suitable local directory and run the project tests.
-Install SKILL.md and agents/openai.yaml into a personal skill directory supported
+Explain the Codex, dashboard and optional Feishu entry points. Configure the bundled
+workflow/ service only after confirming project and chat bindings.
+Install SKILL.md, agents/openai.yaml and references/ into a personal skill directory supported
 by this host, preferring ~/.agents/skills/codex-superagent-sample.
 If an installation already exists, back it up and preserve personal policy,
 dependencies, and other settings. Avoid duplicate installations.
@@ -86,7 +119,8 @@ npm test
 skill_dir="$HOME/.agents/skills/codex-superagent-sample"
 test ! -e "$skill_dir" && mkdir -p "$skill_dir/agents" &&
   cp SKILL.md "$skill_dir/SKILL.md" &&
-  cp agents/openai.yaml "$skill_dir/agents/openai.yaml"
+  cp agents/openai.yaml "$skill_dir/agents/openai.yaml" &&
+  cp -R references "$skill_dir/references"
 ```
 
 Alternatively, install the same files under your repository's `.agents/skills/codex-superagent-sample/`. Existing hosts using `~/.codex/skills/` can retain that location. Choose one location your host discovers and avoid duplicate copies. See the [official Codex skills guide](https://learn.chatgpt.com/docs/build-skills) for discovery locations. Reopen Codex if the skill does not appear.

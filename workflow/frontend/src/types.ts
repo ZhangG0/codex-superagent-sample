@@ -1,0 +1,9 @@
+export type UsageRow={stage:string;expected?:boolean;status:string;finished?:boolean;title?:string;invocation_id?:string;attempt?:number;model?:string;input_tokens:number|null;output_tokens:number|null;cached_input_tokens:number|null;reasoning_output_tokens:number|null;total_tokens:number|null};
+export type Usage={total_tokens:number|null;status:string;stages:UsageRow[];invocations:UsageRow[]};
+export type Message={teams?:{key:string;name:string}[];id:string;source:string;content:string;state:string;received_at:number;requirement_id?:string;metadata_json:string;error?:string;candidates?:{id:string;title:string}[]};
+export type Task={id:string;title:string;state:string;deliverable:string;acceptance_json:string;resources_json:string;dependencies:string[];preferred_worker_key?:string};
+export type Run={id:string;task_id?:string;kind:string;state:string;output_summary?:string;error?:string;evidence_json:string};
+export type Requirement={teams?:{key:string;name:string}[];archived_at?:number|null;id:string;title:string;project_key:string;state:string;stage:string;revision:number;updated_at:number;goal:string;scope:string;acceptance_json:string;analysis_json:string;task_count:number;accepted_count:number;wait_reason?:string;usage?:Usage};
+export type Detail=Requirement&{messages:Message[];tasks:Task[];runs:Run[];events:{id:number;created_at:number;type:string}[];notifications:{id:string;source:string;state:string;content:string;error?:string}[]};
+export type Team={workflowEnabled:boolean;key:string;name:string;enabled:boolean;connected:boolean};
+export type Board={requirements:Requirement[];intake:Message[];teams:Team[];selectedTeam:string;teamNotice?:string;runtime:{enabled:boolean;configured:boolean;active:number};};

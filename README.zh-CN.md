@@ -16,6 +16,10 @@
      TypeScript / SQLite ← 回执、进度与验收证据
 ```
 
+## 入口与模块
+
+本仓库已包含原 dispatcher 台账和 `workflow/` 工作流服务及 React 看板。Codex 主入口使用 [Skill](SKILL.md)，本地看板安装见 [Workflow 指南](workflow/README.md)，飞书群聊入口使用独立仓库 [feishu-codex-bridge](https://github.com/ZhangG0/feishu-codex-bridge)。团队关闭工作流时，Bridge 可以独立收发，主入口仍可协调其他聊天。
+
 ## 为什么使用它
 
 同时维护多个项目聊天时，协调本身也会成为工作：记住任务交给了谁、判断超时后是否该重发、确认共享资源由谁占用，以及收集证据后再宣布完成。本项目为这些工作提供可重复的流程和持久记录。
